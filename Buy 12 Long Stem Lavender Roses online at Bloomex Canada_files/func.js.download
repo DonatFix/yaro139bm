@@ -1,0 +1,9 @@
+function changeStateList(state_list_name,element_country_id){if(!element_country_id){element_country_id='country_billing';}
+if(!state_list_name){state_list_name='state_billing';}
+if(element_country_id=="country_shipping"){selected_country="CAN";}else{var nSelectIndex=document.getElementById(element_country_id).selectedIndex;var selected_country=document.getElementById(element_country_id).options[nSelectIndex].value;}
+if(!document.getElementById(state_list_name)){state_list_name='state';}
+changeDynaList2(state_list_name,eval(state_list_name),selected_country,"","");}
+function changeDynaList2(listname,source,key,orig_key,orig_val){var list2=document.getElementById(listname);for(i in list2.options.length){list2.options[i]=null;}
+i=0;s="";for(x in source){if(source[x][0]==key){opt=new Option();opt.value=source[x][1];opt.text=source[x][2];if((orig_key==key&&orig_val==opt.value)||i==0){opt.selected=true;}
+list2.options[i++]=opt;}}
+list2.length=i;}

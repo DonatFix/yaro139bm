@@ -1,0 +1,65 @@
+var autocomplete_billing;var autocomplete_shipping;var address_details;var country_billing='CA';var componentForm={street_number:'short_name',route:'long_name',locality:'long_name',administrative_area_level_1:'short_name',country:'short_name',postal_code:'short_name'};function fillInAddress(type){var countries=jQuery.parseJSON(countries_json)
+if(type=='billing'){var place=autocomplete_billing.getPlace();}else{var place=autocomplete_shipping.getPlace();}
+address_details=new Object();if(place.address_components){for(var i=0;i<place.address_components.length;i++){var addressType=place.address_components[i].types[0];if(componentForm[addressType]){var val=place.address_components[i][componentForm[addressType]];if(addressType=='country'){address_details[addressType]=countries[val];}else{address_details[addressType]=val;}}}}
+if(place.name&&jQuery('#shipping_info_address_type2').val()!='Home/Residence'){address_details['company_name']=place.name;}}
+function get_billing_country(){jQuery.ajax({type:'POST',url:'index.php?',async:false,data:({option:'com_ajaxorder',task:'get_billing_country'}),dataType:'json',success:function(json){if(json.msg){country_billing=json.msg}}})}
+function initAutocomplete(){if(jQuery('form').is('#registration_form')){get_billing_country();jQuery("#last_name").parent().after('<div class="form-group"><label for="googleaddress">Address Autocomplete</label><input type="text" class="form-control" id="googleaddressbilling" placeholder="Start Typing To Search"></div>');var googleaddressbilling=(document.getElementById('googleaddressbilling'));autocomplete_billing=new google.maps.places.Autocomplete(googleaddressbilling,{types:['geocode'],componentRestrictions:{country:country_billing}});autocomplete_billing.addListener('place_changed',function(event){fillInAddress('billing');if(address_details.street_number){jQuery('#address_street_number').val(address_details.street_number).addClass('autocomplete')}
+else{jQuery('#address_street_number').val('').removeClass('autocomplete')}
+if(address_details.route){jQuery('#address_street_name').val(address_details.route).addClass('autocomplete')}
+else{jQuery('#address_street_name').val('').removeClass('autocomplete')}
+if(address_details.locality){jQuery('#city').val(address_details.locality).addClass('autocomplete')}
+else{jQuery('#city').val('').removeClass('autocomplete')}
+if(address_details.postal_code){jQuery('#zip').val(address_details.postal_code).addClass('autocomplete')}
+else{jQuery('#zip').val('').removeClass('autocomplete')}
+if(address_details.country){jQuery('#country_billing').val(address_details.country).addClass('autocomplete')}
+else{jQuery('#country_billing').val('').removeClass('autocomplete')}
+changeStateList();if(address_details.administrative_area_level_1){jQuery('#state').val(address_details.administrative_area_level_1).addClass('autocomplete')}
+else{jQuery('#state').val('').removeClass('autocomplete')}})}
+else if(jQuery('form').is('#update_billing_info_form')){get_billing_country();jQuery("#billing_info_last_name").parent().after('<div class="form-group"><label for="googleaddress">Address Autocomplete</label><input type="text" class="form-control" id="googleaddressbilling_update"  placeholder="Start Typing To Search"></div>');var googleaddressbilling_update=(document.getElementById('googleaddressbilling_update'));autocomplete_billing=new google.maps.places.Autocomplete(googleaddressbilling_update,{types:['geocode'],componentRestrictions:{country:country_billing}});autocomplete_billing.addListener('place_changed',function(event){fillInAddress('billing');if(address_details.street_number){jQuery('#billing_info_street_number').val(address_details.street_number).addClass('autocomplete')}
+else{jQuery('#billing_info_street_number').val('').removeClass('autocomplete')}
+if(address_details.route){jQuery('#billing_info_street_name').val(address_details.route).addClass('autocomplete')}
+else{jQuery('#billing_info_street_name').val('').removeClass('autocomplete')}
+if(address_details.locality){jQuery('#billing_info_city').val(address_details.locality).addClass('autocomplete')}
+else{jQuery('#billing_info_city').val('').removeClass('autocomplete')}
+if(address_details.postal_code){jQuery('#billing_info_zip').val(address_details.postal_code).addClass('autocomplete')}
+else{jQuery('#billing_info_zip').val('').removeClass('autocomplete')}
+if(address_details.country){jQuery('#billing_info_country').val(address_details.country).addClass('autocomplete')}
+else{jQuery('#billing_info_country').val('').removeClass('autocomplete')}
+changeStateList('billing_info_state','billing_info_country');if(address_details.administrative_area_level_1){jQuery('#billing_info_state').val(address_details.administrative_area_level_1).addClass('autocomplete')}
+else{jQuery('#billing_info_state').val('').removeClass('autocomplete')}})
+jQuery("#shipping_info_last_name").parent().after('<div class="form-group">'+
+'<label for="googleaddressupdate_shipping">Address Autocomplete</label>'+
+'<input type="text" style="display: none" class="form-control autocomplete_place" placeholder="" id="googleaddressupdate_place"><div id="place_result"></div>'+
+'<input type="text" class="form-control  autocomplete_address" id="googleaddressupdate_shipping"  placeholder="start typing address..."></div>');jQuery("#shipping_info_last_name").parent().after('<div class="form-group"><label for="shipping_info_address_type2">Address Type:</label>'+
+'<select id="shipping_info_address_type2" class="form-control" name="address_type2">'+
+'<option value="Home/Residence" >Home/Residence</option>'+
+'<option value="Business">Business</option>'+
+'<option value="Funeral Home">Funeral Home</option>'+
+'<option value="Hospital">Hospital</option>'+
+'<option value="School">School</option>'+
+'<option value="Place of Worship">Place of Worship</option>'+
+'<option value="Hotel">Hotel</option>'+
+'<option value="Nursing/Retirement Home">Nursing/Retirement Home</option>'+
+'</select></div>');var googleaddressupdate_shipping=(document.getElementById('googleaddressupdate_shipping'));autocomplete_shipping=new google.maps.places.Autocomplete(googleaddressupdate_shipping,{types:['geocode'],componentRestrictions:{country:"CA"}});autocomplete_shipping.addListener('place_changed',function(event){fillInAddress('shipping');setshippingvalue();});jQuery('#shipping_info_address_type2').change(function(){jQuery(".div_shipping_info_company").show();if(jQuery(this).val()=='Home/Residence'||jQuery(this).val()=='Business'){jQuery('.autocomplete_address').show();jQuery('.autocomplete_place').hide();if(jQuery(this).val()=='Business'){jQuery("#googleaddressupdate_shipping").attr('placeholder','start typing Business name...');autocomplete_shipping.types[0]='establishment';}
+else{jQuery("#googleaddressupdate_shipping").attr('placeholder','start typing address...');autocomplete_shipping.types[0]='geocode';}}
+else{jQuery("#googleaddressupdate_place").attr('placeholder','start typing City or name of '+jQuery(this).val()+'...');jQuery('.autocomplete_address').hide();jQuery('.autocomplete_place').show();}
+jQuery('#place_result').html('').hide();});function setshippingvalue(){if(address_details.street_number){jQuery('#shipping_info_street_number').val(address_details.street_number).addClass('autocomplete');}
+else{jQuery('#shipping_info_street_number').val('').removeClass('autocomplete');}
+if(address_details.route){jQuery('#shipping_info_street_name').val(address_details.route).addClass('autocomplete');}
+else{jQuery('#shipping_info_street_name').val('').removeClass('autocomplete');}
+if(address_details.locality){jQuery('#shipping_info_city').val(address_details.locality).addClass('autocomplete');}
+else{jQuery('#shipping_info_city').val('').removeClass('autocomplete');}
+if(address_details.postal_code){jQuery('#shipping_info_zip').val(address_details.postal_code).addClass('autocomplete');}
+else{jQuery('#shipping_info_zip').val('').removeClass('autocomplete');}
+if(address_details.company_name){jQuery('#shipping_info_company').val(address_details.company_name).addClass('autocomplete');}
+else{jQuery('#shipping_info_company').val('').removeClass('autocomplete');}
+jQuery('#shipping_info_country').val('CAN').addClass('autocomplete');if(address_details.administrative_area_level_1){jQuery('#shipping_info_state').val(address_details.administrative_area_level_1).addClass('autocomplete');}
+else{jQuery('#shipping_info_state').val('').removeClass('autocomplete');}
+if(address_details.phone){jQuery('#shipping_info_phone_1').val(address_details.phone).addClass('autocomplete');}
+else{jQuery('#shipping_info_phone_1').val('').removeClass('autocomplete');}}
+function create_places_list(place,query_string){jQuery.ajax({type:'POST',url:'index.php?',data:({option:'com_ajaxorder',task:'get_google_place',place:place,query_string:query_string}),dataType:'json',success:function(json){if(json.msg!='empty'){jQuery('#place_result').show().html(json.msg)
+jQuery('.place_result_item').on('click',function(){var company_name_selected=jQuery(this).text();jQuery.ajax({type:'POST',url:'index.php?',data:({option:'com_ajaxorder',task:'get_google_geocode',address:jQuery(this).attr('address'),place_id:jQuery(this).data('place_id')}),dataType:'json',success:function(json_details){jQuery('#place_result').html('').hide()
+if(json_details.msg!='empty'){address_details=json_details.msg
+address_details.company_name=company_name_selected
+setshippingvalue()}}})})}else{jQuery('#place_result').html('').hide()}}});}
+var typingTimer;var doneTypingInterval=1000;var autocomplete_place=jQuery('.autocomplete_place');autocomplete_place.on('keyup',function(){clearTimeout(typingTimer);typingTimer=setTimeout(doneTyping,doneTypingInterval);});autocomplete_place.on('keydown',function(){clearTimeout(typingTimer);});function doneTyping(){create_places_list(jQuery('#shipping_info_address_type2').val(),jQuery('.autocomplete_place').val());}}}
